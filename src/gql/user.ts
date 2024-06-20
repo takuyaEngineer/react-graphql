@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-export const GET_USERS = gql`
+export const GQL_GET_USERS = gql`
   query {
     users {
       name
@@ -16,6 +16,15 @@ export const GET_USERS = gql`
         published
         authorId
       }
+    }
+  }
+`;
+
+export const GQL_UPDATE_USER = gql`
+  mutation UpdateUser($id: Int!, $email: String!, $name: String!) {
+    updateUser(userUpdateInput: { id: $id, email: $email, name: $name }) {
+      email
+      name
     }
   }
 `;
