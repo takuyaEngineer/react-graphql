@@ -5,25 +5,35 @@ import { user } from "./types/user";
 
 const TodoPrivateListQuery = () => {
   const { loading, error, data } = useQuery(GET_USERS);
-  //   if (loading) {
-  //     return <div>Loading...</div>;
-  //   }
-  //   if (error) {
-  //     console.error(error);
-  //     return <div>Error!</div>;
-  //   }
-  const users: user[] = data?.users;
+  if (loading) {
+    return false;
+  }
+  if (error) {
+    console.error(error);
+    return false;
+  }
+  const users: user[] = data.users;
   return users;
 };
 
 function App() {
-  const users = TodoPrivateListQuery();
-  console.log(users && users[0].name);
-  //   if (users !== undefined) {
-  //     console.log(users[0]);
-  //   }
+  const users: user[] = TodoPrivateListQuery() || [];
 
-  return <div>hello world</div>;
+  return (
+    <div>
+      <h2>ユーザー一覧</h2>
+      {users.map((user) => {
+        return (
+          <div key={user.id}>
+            <p>id:{user.id}</p>
+            <p>name:{user.name}</p>
+            <p>email:{user.email}</p>
+            <hr />
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default App;
