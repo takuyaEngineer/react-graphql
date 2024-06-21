@@ -1,37 +1,56 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { GQL_CREATE_USER, GQL_GET_USERS, GQL_UPDATE_USER } from "./gql/user";
+import {
+  GQL_CREATE_USER,
+  GQL_DELETE_USER,
+  GQL_GET_USERS,
+  GQL_UPDATE_USER,
+} from "./gql/user";
 import { user } from "./types/user";
 import { useMutation, useQuery } from "@apollo/client";
-
-type inputUpdateUser = {
-  id: number;
-  email: string;
-  name?: string;
-};
 
 type inputCreateUser = {
   email: string;
   name?: string;
 };
 
-function App() {
-  // ユーザー一覧を取得
-  const resGetUser = useQuery(GQL_GET_USERS);
-  const [userList, setUserList] = useState<user[]>([]);
+type inputUpdateUser = {
+  id: number;
+  email?: string;
+  name?: string;
+};
 
+type inputDeleteUser = {
+  id: number;
+};
+
+function App() {
+  const resGetUser = useQuery(GQL_GET_USERS);
+  const resCreateUser = useMutation(GQL_CREATE_USER);
+  const resUpdateUser = useMutation(GQL_UPDATE_USER);
+  const resDeleteUser = useMutation(GQL_DELETE_USER);
+
+  // ユーザー一覧
+  const [userList, setUserList] = useState<user[]>([]);
   useEffect(() => {
     setUserList(() => resGetUser.data?.users);
   }, [resGetUser.data]);
-
-  const resCreateUser = useMutation(GQL_CREATE_USER);
-  const resUpdateUser = useMutation(GQL_UPDATE_USER);
-
-  // ユーザー作成の入力欄データ
+  // ユーザー作成の入力値
   const [inputCreateUser, setInputCreateUser] = useState<inputCreateUser>({
     email: "",
     name: "",
   });
+  // ユーザー更新の入力値
+  const [inputUpdateUser, setInputUpdateUser] = useState<inputUpdateUser>({
+    id: 0,
+    email: "",
+    name: "",
+  });
+  // ユーザー削除の入力値
+  const [inputDeleteUser, setInputDeleteUser] = useState<inputDeleteUser>({
+    id: 0,
+  });
+
   /**
    * ユーザーを作成する.
    */
@@ -57,13 +76,6 @@ function App() {
         console.log(error);
       });
   };
-
-  // ユーザー更新の入力欄データ
-  const [inputUpdateUser, setInputUpdateUser] = useState<inputUpdateUser>({
-    id: 0,
-    email: "",
-    name: "",
-  });
   /**
    * ユーザーを更新する.
    */
@@ -81,6 +93,28 @@ function App() {
             id: 0,
             email: "",
             name: "",
+          };
+        });
+        console.log("success");
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  /**
+   * ユーザーを削除する.
+   */
+  const deleteUser = () => {
+    resDeleteUser[0]({
+      variables: {
+        id: inputDeleteUser?.id,
+      },
+    })
+      .then(() => {
+        setInputDeleteUser(() => {
+          return {
+            id: 0,
           };
         });
         console.log("success");
@@ -167,6 +201,27 @@ function App() {
           }}
         >
           更新
+        </button>
+      </div>
+      <div>
+        <h2>ユーザー削除</h2>
+        ID:
+        <input
+          type="number"
+          value={inputDeleteUser?.id}
+          onChange={(e) =>
+            setInputDeleteUser({
+              ...inputDeleteUser,
+              id: Number(e.target.value),
+            })
+          }
+        />
+        <button
+          onClick={() => {
+            deleteUser();
+          }}
+        >
+          削除
         </button>
       </div>
     </div>

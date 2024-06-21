@@ -43,3 +43,14 @@ export const GQL_UPDATE_USER = gql`
     }
   }
 `;
+/**
+ * ユーザー削除のミューテーション
+ */
+export const GQL_DELETE_USER = gql`
+  mutation RemoveUser($id: Int!) {
+    removeUser(id: $id) {
+      email
+      name
+    }
+  }
+`;
