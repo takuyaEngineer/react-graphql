@@ -1,41 +1,49 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { GQL_GET_USERS, GQL_UPDATE_USER } from "./gql/user";
+import { GQL_CREATE_USER, GQL_GET_USERS, GQL_UPDATE_USER } from "./gql/user";
 import { user } from "./types/user";
 import { useMutation, useQuery } from "@apollo/client";
 
-type inputUser = {
-  id?: number;
-  email?: string;
+type inputUpdateUser = {
+  id: number;
+  email: string;
+  name?: string;
+};
+
+type inputCreateUser = {
+  email: string;
   name?: string;
 };
 
 function App() {
+  // ユーザー一覧を取得
   const resGetUser = useQuery(GQL_GET_USERS);
   const [userList, setUserList] = useState<user[]>([]);
-
-  const resUpdateUser = useMutation(GQL_UPDATE_USER);
-
-  const [inputUser, setInputUser] = useState<inputUser>({
-    id: 0,
-    email: "",
-    name: "",
-  });
 
   useEffect(() => {
     setUserList(() => resGetUser.data?.users);
   }, [resGetUser.data]);
 
-  const updateUser = () => {
-    resUpdateUser[0]({
+  const resCreateUser = useMutation(GQL_CREATE_USER);
+  const resUpdateUser = useMutation(GQL_UPDATE_USER);
+
+  // ユーザー作成の入力欄データ
+  const [inputCreateUser, setInputCreateUser] = useState<inputCreateUser>({
+    email: "",
+    name: "",
+  });
+  /**
+   * ユーザーを作成する.
+   */
+  const createUser = () => {
+    resCreateUser[0]({
       variables: {
-        id: inputUser?.id,
-        email: inputUser?.email,
-        name: inputUser?.name,
+        email: inputCreateUser?.email,
+        name: inputCreateUser?.name,
       },
     })
       .then(() => {
-        setInputUser(() => {
+        setInputCreateUser(() => {
           return {
             id: 0,
             email: "",
@@ -43,6 +51,40 @@ function App() {
           };
         });
         console.log("success");
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // ユーザー更新の入力欄データ
+  const [inputUpdateUser, setInputUpdateUser] = useState<inputUpdateUser>({
+    id: 0,
+    email: "",
+    name: "",
+  });
+  /**
+   * ユーザーを更新する.
+   */
+  const updateUser = () => {
+    resUpdateUser[0]({
+      variables: {
+        id: inputUpdateUser?.id,
+        email: inputUpdateUser?.email,
+        name: inputUpdateUser?.name,
+      },
+    })
+      .then(() => {
+        setInputUpdateUser(() => {
+          return {
+            id: 0,
+            email: "",
+            name: "",
+          };
+        });
+        console.log("success");
+        window.location.reload();
       })
       .catch((error) => {
         console.log(error);
@@ -65,28 +107,59 @@ function App() {
         })}
       </div>
       <div>
-        <h2>ユーザー更新</h2>
-        ID:
-        <input
-          type="number"
-          value={inputUser?.id}
-          onChange={(e) =>
-            setInputUser({ ...inputUser, id: Number(e.target.value) })
-          }
-        />
+        <h2>ユーザー作成</h2>
         email:
         <input
           type="email"
-          value={inputUser?.email}
+          value={inputCreateUser?.email}
           onChange={(e) =>
-            setInputUser({ ...inputUser, email: e.target.value })
+            setInputCreateUser({ ...inputCreateUser, email: e.target.value })
           }
         />
         name:
         <input
           type="text"
-          value={inputUser?.name}
-          onChange={(e) => setInputUser({ ...inputUser, name: e.target.value })}
+          value={inputCreateUser?.name}
+          onChange={(e) =>
+            setInputCreateUser({ ...inputCreateUser, name: e.target.value })
+          }
+        />
+        <button
+          onClick={() => {
+            createUser();
+          }}
+        >
+          作成
+        </button>
+      </div>
+      <div>
+        <h2>ユーザー更新</h2>
+        ID:
+        <input
+          type="number"
+          value={inputUpdateUser?.id}
+          onChange={(e) =>
+            setInputUpdateUser({
+              ...inputUpdateUser,
+              id: Number(e.target.value),
+            })
+          }
+        />
+        email:
+        <input
+          type="email"
+          value={inputUpdateUser?.email}
+          onChange={(e) =>
+            setInputUpdateUser({ ...inputUpdateUser, email: e.target.value })
+          }
+        />
+        name:
+        <input
+          type="text"
+          value={inputUpdateUser?.name}
+          onChange={(e) =>
+            setInputUpdateUser({ ...inputUpdateUser, name: e.target.value })
+          }
         />
         <button
           onClick={() => {
